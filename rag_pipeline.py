@@ -1,4 +1,3 @@
-from pypdf import PdfReader
 import os
 
 def load_documents(folder):
@@ -6,35 +5,27 @@ def load_documents(folder):
 
     for file in os.listdir(folder):
 
-        if not file.lower().endswith(".pdf"):
-            continue
+        if file.endswith(".txt"):
 
-        path = os.path.join(folder, file)
+            with open(
+                os.path.join(folder, file),
+                "r",
+                encoding="utf-8"
+            ) as f:
 
-        try:
-            reader = PdfReader(path)
-
-            text = ""
-
-            for page in reader.pages:
-                page_text = page.extract_text()
-                if page_text:
-                    text += page_text
+                text = f.read()
 
             docs.append({
                 "file": file,
-                "text": text,
-                "pages": len(reader.pages)
+                "text": text
             })
-
-        except Exception as e:
-            print(f"Skipping invalid PDF: {file}")
-            print(e)
 
     return docs
 
+
 def generate_answer(question):
-    docs = load_documents("documents")
+
+    docs = load_documents("data")
 
     context = ""
 
@@ -43,14 +34,8 @@ def generate_answer(question):
 
     question = question.lower()
 
-    if "leave" in question:
-        for doc in docs:
-            if "leave" in doc["text"].lower():
-                return doc["text"][:1000]
+    for doc in docs:
+        if any(word in doc["text"].lower() for word in question.split()):
+            return context, doc["text"]
 
-    if "travel" in question:
-        for doc in docs:
-            if "travel" in doc["text"].lower():
-                return doc["text"][:1000]
-
-    return context[:1000]
+    return context, "No relevant policy found."
