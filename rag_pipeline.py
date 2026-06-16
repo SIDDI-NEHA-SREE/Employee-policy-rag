@@ -27,7 +27,7 @@ def load_documents(folder):
 
 
 def generate_answer(question):
-    docs = load_documents("data")
+    docs = load_documents("documents")
 
     context = ""
 
