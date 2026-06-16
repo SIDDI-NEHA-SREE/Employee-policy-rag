@@ -5,10 +5,14 @@ def load_documents(folder):
     docs = []
 
     for file in os.listdir(folder):
-        if file.endswith(".pdf"):
-            reader = PdfReader(
-                os.path.join(folder, file)
-            )
+
+        if not file.lower().endswith(".pdf"):
+            continue
+
+        path = os.path.join(folder, file)
+
+        try:
+            reader = PdfReader(path)
 
             text = ""
 
@@ -23,8 +27,11 @@ def load_documents(folder):
                 "pages": len(reader.pages)
             })
 
-    return docs
+        except Exception as e:
+            print(f"Skipping invalid PDF: {file}")
+            print(e)
 
+    return docs
 
 def generate_answer(question):
     docs = load_documents("documents")
